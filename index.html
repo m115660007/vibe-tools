@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>童趣夜市 - Night Market Adventure</title>
+  <meta name="description" content="台灣夜市經典小遊戲互動合輯！自由漫步夜市大街、挑戰射氣球、套圈圈、抓娃娃、打彈珠台、撈金魚、棒球九宮格、麻將對對碰等七大經典小遊戲，累積代幣收集30款稀有珍藏獎品與登上排行榜！" />
+  <meta property="og:title" content="童趣夜市 - Night Market Adventure" />
+  <meta property="og:description" content="台灣夜市經典小遊戲互動合輯！自由漫步夜市大街、挑戰七大經典小遊戲，累積代幣收集30款稀有珍藏獎品！" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Fonts for authentic Taiwanese retro signage -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN for high-fidelity UI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            amber: { 450: '#f59e0b' }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+            display: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Neon & Street Atmosphere Styles */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.6)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 24px rgba(239, 68, 68, 0.9)); }
+    }
+    .neon-glow { animation: pulseGlow 3s infinite ease-in-out; }
+
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .float-bob { animation: floatBob 2s infinite ease-in-out; }
+
+    @keyframes lanternSway {
+      0%, 100% { transform: rotate(-2.5deg); }
+      50% { transform: rotate(2.5deg); }
+    }
+    .lantern-sway { animation: lanternSway 3.5s infinite ease-in-out; transform-origin: top center; }
+
+    @keyframes steamRise {
+      0% { transform: translateY(0) scale(0.8); opacity: 0.6; }
+      100% { transform: translateY(-22px) scale(1.3); opacity: 0; }
+    }
+    .steam-bubble { animation: steamRise 1.8s infinite ease-out; }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Prevent accidental text drag during games */
+    .no-select { user-select: none; -webkit-user-select: none; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-amber-500 selection:text-slate-950 no-select">
+
+  <!-- Top Navigation Bar (Top Bar Contract: 3 Zones) -->
+  <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
+      <!-- Zone 1: Single text element wordmark -->
+      <button onclick="switchView('map')" class="text-lg font-black tracking-tight text-amber-400 hover:text-amber-300 transition-colors whitespace-nowrap shrink-0 flex items-center gap-2 text-left">
+        <span class="text-xl">🏮</span>
+        <span>童趣夜市</span>
+        <span class="text-xs font-semibold text-slate-400 hidden sm:inline">Night Market Adventure</span>
+      </button>
+
+      <!-- Zone 2: Single-line text navigation links -->
+      <nav class="flex items-center gap-4 sm:gap-6 text-sm font-medium text-slate-300">
+        <button onclick="switchView('map')" id="nav-btn-map" class="hover:text-amber-400 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 text-amber-400 font-bold">
+          <span>🗺️ 夜市大街</span>
+        </button>
+        <button onclick="openCabinetModal()" class="hover:text-amber-400 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5">
+          <span>🎁 獎品展示櫃</span>
+        </button>
+        <button onclick="openLeaderboardModal()" class="hover:text-amber-400 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5">
+          <span>🏆 排行榜</span>
+        </button>
+        <button onclick="openHelpModal()" class="hover:text-amber-400 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5">
+          <span>📖 說明</span>
+        </button>
+      </nav>
+
+      <!-- Zone 3: Token balance & sound controls -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono font-bold text-amber-300">
+          <span>🪙</span>
+          <span id="header-tokens">10</span>
+          <span class="text-[10px] text-slate-400 font-sans font-normal">代幣</span>
+        </div>
+        <button onclick="toggleMute()" id="sound-btn" class="p-2 text-slate-400 hover:text-slate-100 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg transition-colors" title="音效切換">
+          <span id="sound-icon">🔊</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center">
+
+    <!-- ==========================================
+         VIEW: Open World Night Market Street Map
+         ========================================== -->
+    <div id="view-map" class="w-full flex flex-col items-center">
+      <!-- High-Fidelity Hero Banner -->
+      <div class="relative w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl mb-6">
+        <div class="relative h-60 sm:h-64 w-full overflow-hidden">
+          <img src="/src/assets/images/night_market_hero_1791879959128.jpg" alt="熱鬧夜市街景" class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700" onerror="this.style.display='none'" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/30 to-transparent"></div>
+
+          <div class="absolute bottom-5 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+            <div class="max-w-xl">
+              <div class="flex items-center gap-2 text-xs font-semibold text-amber-400 mb-1.5">
+                <span>台灣經典夜市嘉年華</span>
+                <span aria-hidden="true">·</span>
+                <span>七大經典攤位</span>
+                <span aria-hidden="true">·</span>
+                <span class="text-rose-400">高品質實境物理手感</span>
+              </div>
+              <h1 class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
+                童趣夜市 · Night Market Adventure
+              </h1>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
+                漫步在紅燈籠與霓虹招牌輝映的台灣夜市大街，自由挑戰射氣球、套圈圈、抓娃娃機、棒球九宮格、打彈珠台、撈金魚、麻將對對碰等七大經典攤位，累積代幣收集30款珍藏戰利品！
+              </p>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <button onclick="openHelpModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 rounded-xl transition-colors backdrop-blur-sm">
+                新手教學
+              </button>
+              <button onclick="document.getElementById('market-canvas-box').scrollIntoView({behavior:'smooth'})" class="px-5 py-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 hover:from-amber-300 hover:to-orange-300 rounded-xl shadow-lg shadow-amber-950 transition-all transform hover:-translate-y-0.5 flex items-center gap-1.5">
+                <span>🎮 開始逛夜市</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 2.5D Street Exploration Map -->
+      <div id="market-canvas-box" class="relative w-full h-[520px] bg-[#16100d] rounded-2xl border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.85)] overflow-hidden">
+        <!-- Stone Pavement Background Grid -->
+        <div class="absolute inset-0 opacity-90" style="background-image: radial-gradient(#2d1e16 1.5px, transparent 1.5px), radial-gradient(#241812 1px, #16100d 1px); background-size: 28px 28px; background-position: 0 0, 14px 14px;"></div>
+
+        <!-- Overhead Lighting Glow -->
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-amber-500/15 via-red-500/5 to-transparent pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-amber-500/10 via-purple-500/5 to-transparent pointer-events-none"></div>
+
+        <!-- Hanging Red Lantern Strings -->
+        <div class="absolute top-2 left-6 right-6 flex items-center justify-around pointer-events-none z-10">
+          <div class="flex flex-col items-center lantern-sway"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">吉</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:0.3s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">祥</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:0.6s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">如</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:0.9s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">意</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:1.2s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">夜</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:1.5s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">市</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:1.8s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">大</div></div>
+          <div class="flex flex-col items-center lantern-sway" style="animation-delay:2.1s;"><div class="w-0.5 h-3 bg-slate-600"></div><div class="w-6 h-7 bg-gradient-to-b from-red-600 to-amber-600 rounded-lg shadow-[0_0_12px_rgba(239,68,68,0.8)] flex items-center justify-center text-[10px] text-amber-200 font-bold border border-amber-400">吉</div></div>
+        </div>
+
+        <div class="absolute top-3.5 left-1/2 -translate-x-1/2 z-15 bg-gradient-to-r from-red-950 via-amber-950 to-red-950 px-6 py-1 rounded-full border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.5)] text-amber-300 text-xs font-black tracking-widest pointer-events-none">
+          ★ 台灣夜市大冒險 · 七大經典攤位 ★
+        </div>
+
+        <!-- 7 Game Stalls (Upper & Lower Streets) -->
+        <div onclick="startGame('balloon')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 60px; top: 75px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">🎯</div>
+          <div class="text-[11px] font-bold text-slate-100">神射手射氣球</div>
+          <div class="text-[9px] text-rose-400 font-mono">動態移動靶</div>
+        </div>
+
+        <div onclick="startGame('ringToss')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 235px; top: 75px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">⭕</div>
+          <div class="text-[11px] font-bold text-slate-100">好手氣套圈圈</div>
+          <div class="text-[9px] text-amber-400 font-mono">三層階梯架</div>
+        </div>
+
+        <div onclick="startGame('clawMachine')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 410px; top: 75px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">🕹️</div>
+          <div class="text-[11px] font-bold text-slate-100">歡樂百寶抓娃娃</div>
+          <div class="text-[9px] text-purple-400 font-mono">2.5D等角機台</div>
+        </div>
+
+        <div onclick="startGame('baseball')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 585px; top: 75px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">⚾</div>
+          <div class="text-[11px] font-bold text-slate-100">王牌棒球九宮格</div>
+          <div class="text-[9px] text-red-400 font-mono">測速翻牌連線</div>
+        </div>
+
+        <!-- Lower Street Stalls -->
+        <div onclick="startGame('pinball')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 120px; top: 380px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">🔮</div>
+          <div class="text-[11px] font-bold text-slate-100">懷舊木製打彈珠</div>
+          <div class="text-[9px] text-emerald-400 font-mono">銅釘多軌狂彈</div>
+        </div>
+
+        <div onclick="startGame('goldfish')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 320px; top: 380px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">🐟</div>
+          <div class="text-[11px] font-bold text-slate-100">清涼撈金魚樂園</div>
+          <div class="text-[9px] text-cyan-400 font-mono">網破立即結算</div>
+        </div>
+
+        <div onclick="startGame('mahjong')" class="stall-marker absolute w-[130px] h-[95px] bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-between cursor-pointer transition-all hover:scale-105 z-10 shadow-lg group" style="left: 520px; top: 380px;">
+          <div class="w-full h-2.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 rounded"></div>
+          <div class="text-2xl group-hover:scale-110 transition-transform">🀄</div>
+          <div class="text-[11px] font-bold text-slate-100">幸運麻將對對碰</div>
+          <div class="text-[9px] text-emerald-400 font-mono">摸牌自摸連線</div>
+        </div>
+
+        <!-- 4 Authentic Taiwan Food Stalls with Steam -->
+        <div class="absolute p-2 bg-slate-900/75 border border-amber-600/30 rounded-xl flex flex-col items-center text-center z-10 w-[115px] shadow-lg" style="left: 15px; top: 235px;">
+          <div class="relative"><span class="text-xl">🍗</span><span class="absolute -top-3 left-1 text-[10px] steam-bubble">♨️</span></div>
+          <span class="text-[10px] font-bold text-slate-200">阿美鹽酥雞</span>
+          <span class="text-[9px] text-amber-400">現炸蒜香多椒鹽</span>
+        </div>
+        <div class="absolute p-2 bg-slate-900/75 border border-amber-600/30 rounded-xl flex flex-col items-center text-center z-10 w-[115px] shadow-lg" style="right: 15px; top: 235px;">
+          <div class="relative"><span class="text-xl">🧋</span><span class="absolute -top-3 left-1 text-[10px] steam-bubble">♨️</span></div>
+          <span class="text-[10px] font-bold text-slate-200">黑糖珍珠鮮奶</span>
+          <span class="text-[9px] text-amber-400">古法手炒濃郁</span>
+        </div>
+
+        <!-- Walking Pedestrian NPCs with Dialogue -->
+        <div id="npc-1" class="absolute flex flex-col items-center pointer-events-none z-20 text-xs transition-all duration-300" style="left: 200px; top: 250px;">
+          <div class="text-[9px] bg-slate-900/90 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30 shadow whitespace-nowrap mb-0.5">「老闆鹽酥雞多胡椒！」</div>
+          <div class="text-xl">🚶‍♂️</div>
+        </div>
+        <div id="npc-2" class="absolute flex flex-col items-center pointer-events-none z-20 text-xs transition-all duration-300" style="left: 540px; top: 275px;">
+          <div class="text-[9px] bg-slate-900/90 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30 shadow whitespace-nowrap mb-0.5">「剛才打彈珠噴出大獎！」</div>
+          <div class="text-xl">👩‍🦰</div>
+        </div>
+
+        <!-- Player Avatar -->
+        <div id="player-avatar" class="absolute flex flex-col items-center pointer-events-none z-30 transition-all duration-75" style="left: 380px; top: 260px; transform: translate(-50%, -50%);">
+          <div class="w-8 h-2 bg-black/60 rounded-full blur-[1px]"></div>
+          <div id="avatar-sprite" class="w-10 h-10 rounded-full bg-amber-400 border-2 border-amber-200 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(245,158,11,0.7)]">
+            👦
+          </div>
+          <div id="avatar-tag" class="text-[10px] font-bold text-amber-300 bg-slate-900/95 px-1.5 py-0.5 rounded border border-amber-500/40 mt-1 shadow whitespace-nowrap">
+            夜市小男孩
+          </div>
+        </div>
+
+        <!-- Interactive Proximity Bubble -->
+        <div id="proximity-bubble" onclick="triggerProximityStall()" class="absolute transform -translate-x-1/2 -translate-y-full bg-amber-400 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-full shadow-2xl border-2 border-amber-200 z-40 float-bob cursor-pointer whitespace-nowrap hidden">
+          👉 按 [E] 鍵挑戰遊戲
+        </div>
+
+        <!-- Walk Guide Bar -->
+        <div class="absolute bottom-3 left-4 bg-slate-900/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-800 flex items-center gap-3 text-xs text-slate-300 z-35 shadow-lg">
+          <div class="flex items-center gap-1 font-mono text-amber-400 font-bold">
+            <span class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">W</span>
+            <span class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">A</span>
+            <span class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">S</span>
+            <span class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">D</span>
+          </div>
+          <span>自由移動探索</span>
+          <span class="text-slate-600">·</span>
+          <span>走近攤位按 <strong class="text-amber-400 font-mono">[E]</strong> 進入</span>
+          <span class="text-slate-600">·</span>
+          <button onclick="cycleAvatarSkin()" class="text-amber-400 font-bold hover:underline flex items-center gap-1">
+            <span>換角色</span> <span>🔄</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Travel Dock -->
+      <div class="w-full mt-4 bg-slate-900/95 border border-slate-800 rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">⚡</span>
+          <span class="text-xs font-bold text-slate-200">攤位直達特快車：</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap justify-center">
+          <button onclick="startGame('balloon')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">🎯 射氣球</button>
+          <button onclick="startGame('ringToss')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">⭕ 套圈圈</button>
+          <button onclick="startGame('clawMachine')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">🕹️ 抓娃娃</button>
+          <button onclick="startGame('baseball')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">⚾ 九宮格</button>
+          <button onclick="startGame('pinball')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">🔮 彈珠台</button>
+          <button onclick="startGame('goldfish')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">🐟 撈金魚</button>
+          <button onclick="startGame('mahjong')" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-amber-400 hover:text-slate-950 rounded-lg border border-slate-700 transition-all">🀄 麻將對對碰</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 1. 神射手射氣球 (Balloon Darts)
+         ========================================== -->
+    <div id="view-balloon" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>🎯 神射手射氣球</span>
+            <span class="text-xs font-medium text-rose-400 bg-rose-950/60 border border-rose-800/40 px-2 py-0.5 rounded">動態移動靶</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘飛鏢</span>
+            <span class="text-sm font-bold font-mono text-rose-400 ml-1" id="bd-darts-val">8 發</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前得分</span>
+            <span class="text-2xl font-bold font-mono text-amber-400" id="bd-score-val">0</span>
+          </div>
+          <div id="bd-combo-box" class="px-2.5 py-1 bg-amber-500/20 border border-amber-500/50 rounded-md hidden">
+            <span class="text-xs font-bold text-amber-300" id="bd-combo-val">COMBO x2!</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-balloon" width="760" height="480" class="cursor-crosshair w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span class="flex items-center gap-3 text-rose-300 font-bold">
+            <span>🎯 預判移動靶滑行軌道點擊發射飛鏢！</span>
+            <span class="text-amber-300">⭐金色星 350分</span>
+            <span class="text-rose-400">💣炸彈範圍引爆</span>
+          </span>
+          <span id="bd-accuracy-val" class="text-slate-400 font-mono">命中率: 0%</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <button onclick="initBalloonDarts()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">重新挑戰</button>
+        <button onclick="endBalloonDarts()" class="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 rounded-lg shadow-lg shadow-rose-950 transition-colors">結算戰績</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 2. 好手氣套圈圈 (Ring Toss)
+         ========================================== -->
+    <div id="view-ringToss" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>⭕ 好手氣套圈圈</span>
+            <span class="text-xs font-medium text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">階梯酒瓶·風向阻力</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘圈圈</span>
+            <span class="text-sm font-bold font-mono text-amber-400 ml-1" id="rt-rings-val">8 個</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前得分</span>
+            <span class="text-2xl font-bold font-mono text-amber-400" id="rt-score-val">0</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">即時風向</span>
+            <span class="text-xs font-bold font-mono text-cyan-400" id="rt-wind-val">← 1.2 m/s</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-ringToss" width="760" height="480" class="cursor-crosshair w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span class="flex items-center gap-3">
+            <span class="text-amber-300 font-bold">按住滑鼠【蓄力】調整投擲距離，鬆開投出！</span>
+            <span class="text-slate-400">🍾 前排彈珠汽水 150分 / 中排紅酒 300分 / 後排尊爵金瓶 600分</span>
+          </span>
+          <span id="rt-power-val" class="font-mono text-amber-400 font-bold">蓄力: 0%</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <button onclick="initRingTossGame()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">重新挑戰</button>
+        <button onclick="endRingTossGame()" class="px-5 py-2 text-xs font-semibold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-lg shadow-amber-950 transition-colors">結算戰績</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 3. 歡樂百寶抓娃娃 (Claw Machine)
+         ========================================== -->
+    <div id="view-clawMachine" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>🕹️ 歡樂百寶抓娃娃機</span>
+            <span class="text-xs font-medium text-purple-400 bg-purple-950/60 border border-purple-800/40 px-2 py-0.5 rounded">2.5D霓虹機台</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘次數</span>
+            <span class="text-sm font-bold font-mono text-purple-400 ml-1" id="cm-tries-val">5 次</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">已夾得娃娃</span>
+            <span class="text-2xl font-bold font-mono text-amber-400" id="cm-caught-val">0 隻</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">總得分</span>
+            <span class="text-2xl font-bold font-mono text-purple-300" id="cm-score-val">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-clawMachine" width="760" height="480" class="w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span class="text-purple-300 font-bold">🕹️ 使用按鈕或方向鍵移動天車爪子，按下【下爪】抓取玩偶！越接近玩偶重心越容易抓起！</span>
+          <span id="cm-status-tag" class="text-amber-400 font-mono">準備中</span>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div class="mt-4 flex items-center justify-center gap-3 w-full">
+        <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+          <button onclick="moveClawManual('left')" class="px-3 py-2 bg-slate-800 hover:bg-purple-600 rounded-lg text-sm font-bold text-slate-200 transition-colors">◀ 左</button>
+          <button onclick="moveClawManual('right')" class="px-3 py-2 bg-slate-800 hover:bg-purple-600 rounded-lg text-sm font-bold text-slate-200 transition-colors">右 ▶</button>
+          <button onclick="moveClawManual('up')" class="px-3 py-2 bg-slate-800 hover:bg-purple-600 rounded-lg text-sm font-bold text-slate-200 transition-colors">▲ 前</button>
+          <button onclick="moveClawManual('down')" class="px-3 py-2 bg-slate-800 hover:bg-purple-600 rounded-lg text-sm font-bold text-slate-200 transition-colors">▼ 後</button>
+        </div>
+        <button onclick="dropClawAction()" id="cm-drop-btn" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-950 transition-all flex items-center gap-2">
+          <span>⏬ 下爪抓取！</span>
+        </button>
+        <button onclick="endClawGame()" class="px-4 py-2 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">
+          結算離開
+        </button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 4. 王牌棒球九宮格 (Baseball 9-Grid)
+         ========================================== -->
+    <div id="view-baseball" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>⚾ 王牌棒球九宮格</span>
+            <span class="text-xs font-medium text-red-400 bg-red-950/60 border border-red-800/40 px-2 py-0.5 rounded">控球測速·BINGO連線</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘棒球</span>
+            <span class="text-sm font-bold font-mono text-red-400 ml-1" id="bb-balls-val">8 球</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">連線數</span>
+            <span class="text-sm font-bold font-mono text-amber-400 ml-1" id="bb-lines-val">0 條</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前得分</span>
+            <span class="text-2xl font-bold font-mono text-red-400" id="bb-score-val">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-baseball" width="760" height="480" class="cursor-crosshair w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span id="bb-status-msg" class="text-red-300 font-bold">瞄準木板點擊投球！達成三連線 BINGO 獎勵 +500分！</span>
+          <span id="bb-speed-tag" class="font-mono text-amber-400 font-bold">球速: --- km/h</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+          <button onclick="setPitchType('fast')" id="bb-pitch-fast" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-red-500 text-white shadow-sm">直球 (高精準)</button>
+          <button onclick="setPitchType('curve')" id="bb-pitch-curve" class="px-3 py-1.5 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200">曲球 (下墜偏轉)</button>
+        </div>
+        <button onclick="initBaseballGame()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">重新投球</button>
+        <button onclick="endBaseballGame()" class="px-5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg shadow-lg shadow-red-950 transition-colors">結算戰績</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 5. 懷舊木製打彈珠 (Night Market Pinball)
+         ========================================== -->
+    <div id="view-pinball" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>🔮 懷舊木製打彈珠</span>
+            <span class="text-xs font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">瘋狂銅釘反彈·多倍率軌道</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘鋼珠</span>
+            <span class="text-sm font-bold font-mono text-emerald-400 ml-1" id="pb-marbles-val">8 顆</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前總分</span>
+            <span class="text-2xl font-bold font-mono text-amber-400" id="pb-score-val">0</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">拉桿蓄力</span>
+            <span class="text-sm font-bold font-mono text-cyan-400" id="pb-power-num">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-pinball" width="760" height="480" class="w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span class="text-emerald-300 font-bold">🔮 拖曳拉桿蓄力發射鋼珠！銅釘碰撞強力彈開，挑戰最高 15倍 特賞球道！</span>
+          <span class="text-slate-400">可用空白鍵 [Space] 快速發射</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-4">
+        <div class="flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
+          <span class="text-xs text-slate-400">彈簧拉桿力度：</span>
+          <input type="range" id="pb-power-slider" min="15" max="100" value="50" oninput="updatePlungerPower(this.value)" class="w-36 accent-amber-400 cursor-pointer" />
+        </div>
+        <button onclick="launchPinballMarble()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950 transition-all flex items-center gap-2">
+          <span>🚀 發射鋼珠！</span>
+        </button>
+        <button onclick="initPinballGame()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">重新加珠</button>
+        <button onclick="endPinballGame()" class="px-4 py-2 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">結算離開</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 6. 清涼撈金魚樂園 (Goldfish Scoop)
+         ========================================== -->
+    <div id="view-goldfish" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>🐟 清涼撈金魚樂園</span>
+            <span class="text-xs font-medium text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded">紙網耐用度·破裂即結算</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">網子狀態</span>
+            <span class="text-sm font-bold font-mono text-amber-400" id="gf-status-tag">🕸️ 紙網完整</span>
+          </div>
+          <div class="text-right w-28">
+            <div class="flex justify-between text-xs text-slate-400">
+              <span>紙面耐久</span>
+              <span id="gf-durability-num" class="font-mono text-cyan-300 font-bold">100%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-1">
+              <div id="gf-durability-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-cyan-400 transition-all duration-150" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前得分</span>
+            <span class="text-2xl font-bold font-mono text-cyan-300" id="gf-score-val">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative mt-4 w-full flex justify-center bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+        <canvas id="canvas-goldfish" width="760" height="480" class="cursor-crosshair w-full max-w-[760px] h-auto"></canvas>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300 bg-slate-900/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-800/80">
+          <span class="text-cyan-300 font-bold">🐟 移動紙網對準金魚點擊撈起！紙網泡水或大魚掙扎會扣損耐久，【紙網一旦破裂立即結算戰績】！</span>
+          <span class="text-amber-300 font-bold">🌟 傳奇黃金龍魚 700分</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <button onclick="initGoldfishGame()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">換新網挑戰</button>
+        <button onclick="endGoldfishGame()" class="px-5 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg shadow-lg shadow-cyan-950 transition-colors">結算戰績</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW: 7. 幸運麻將對對碰 (Mahjong Match)
+         ========================================== -->
+    <div id="view-mahjong" class="w-full max-w-4xl flex-col items-center hidden">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('map')" class="px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors">← 返回夜市</button>
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span>🀄 幸運麻將對對碰</span>
+            <span class="text-xs font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">摸牌自摸·連線碰牌</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">剩餘翻牌次數</span>
+            <span class="text-sm font-bold font-mono text-emerald-400 ml-1" id="mj-turns-val">18 回</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">配對成功</span>
+            <span class="text-sm font-bold font-mono text-amber-400 ml-1" id="mj-matches-count">已湊成: 0 / 8 對</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">目前得分</span>
+            <span class="text-2xl font-bold font-mono text-emerald-400" id="mj-score-val">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 w-full bg-slate-900/90 rounded-2xl border border-emerald-900/40 p-6 flex flex-col items-center shadow-2xl">
+        <div class="text-xs text-emerald-300 font-bold mb-4 flex items-center gap-2">
+          <span>🀄 翻開兩張相同花色的麻將牌即可「碰！」湊成一對並獲得高額積分！全部湊成自摸大滿貫！</span>
+        </div>
+        <!-- 4x4 Mahjong Grid -->
+        <div id="mj-tiles-grid" class="grid grid-cols-4 gap-3 w-full max-w-[500px]">
+          <!-- Dynamic Mahjong Tiles -->
+        </div>
+        <div class="mt-4 text-xs font-mono text-amber-300" id="mj-status-text">點擊翻牌開始摸牌</div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <button onclick="initMahjongGame()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">重新洗牌</button>
+        <button onclick="endMahjongGame()" class="px-5 py-2 text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-lg shadow-lg shadow-emerald-950 transition-colors">結算戰績</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==========================================
+       MODAL: Settlement & Lucky Loot Box
+       ========================================== -->
+  <div id="modal-settle" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center">
+      <div class="w-16 h-16 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-3xl mb-3 shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+        🏆
+      </div>
+      <h3 class="text-xl font-black text-slate-100">挑戰結算完成！</h3>
+      <p class="text-xs text-slate-400 mt-1">恭喜完成本次夜市遊戲挑戰，獲得豐厚獎勵！</p>
+
+      <div class="grid grid-cols-3 gap-3 w-full my-5 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+        <div class="flex flex-col items-center">
+          <span class="text-[10px] text-slate-400">最終得分</span>
+          <span class="text-lg font-black font-mono text-amber-400" id="settle-score-text">0</span>
+        </div>
+        <div class="flex flex-col items-center border-x border-slate-800">
+          <span class="text-[10px] text-slate-400">通關評級</span>
+          <span class="text-lg font-black text-rose-400" id="settle-rank-badge">S</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-[10px] text-slate-400">獲得代幣</span>
+          <span class="text-lg font-black font-mono text-emerald-400" id="settle-tokens-text">+3</span>
+        </div>
+      </div>
+
+      <!-- Lucky Loot Box Section -->
+      <div class="w-full bg-gradient-to-b from-amber-950/40 to-slate-950 p-4 rounded-xl border border-amber-500/30 mb-5 flex flex-col items-center">
+        <div id="loot-closed-box" class="flex flex-col items-center">
+          <div class="text-5xl float-bob cursor-pointer my-2" onclick="drawLuckyBox()">🎁</div>
+          <span class="text-xs font-bold text-amber-300">點擊開啟幸運抽獎盲盒！</span>
+          <span class="text-[10px] text-slate-400 mt-0.5">有機會開出稀有、史詩與傳奇夜市珍藏獎品！</span>
+          <button onclick="drawLuckyBox()" class="mt-3 px-4 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold rounded-lg shadow-md transition-all">
+            開箱抽獎！✨
+          </button>
+        </div>
+
+        <div id="loot-revealed-box" class="flex flex-col items-center hidden">
+          <div class="text-5xl my-2" id="loot-prize-icon">🧸</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-sm font-black text-amber-300" id="loot-prize-name">小熊娃娃</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded" id="loot-prize-rarity">稀有</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1 max-w-xs" id="loot-prize-desc">可愛的小熊娃娃，夜市經典戰利品。</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full">
+        <button onclick="repeatCurrentGame()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-colors">
+          🔄 再玩一次
+        </button>
+        <button onclick="closeSettleAndReturn()" class="flex-1 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-950 transition-colors">
+          🗺️ 返回夜市大街
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: 30 款夜市珍藏展示櫃 (Prize Cabinet)
+       ========================================== -->
+  <div id="modal-cabinet" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🎁</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-100">夜市戰利品展示櫃</h3>
+            <p class="text-xs text-slate-400">收集 30 款台灣夜市經典懷舊珍藏！</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-cabinet')" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+      </div>
+
+      <div class="flex items-center justify-between my-3 text-xs">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button onclick="filterCabinet('all')" class="cab-filter-btn px-3 py-1 rounded-md bg-amber-400 text-slate-950 font-bold">全部 (30)</button>
+          <button onclick="filterCabinet('common')" class="cab-filter-btn px-3 py-1 rounded-md text-slate-400 hover:text-slate-200">普通 (8)</button>
+          <button onclick="filterCabinet('rare')" class="cab-filter-btn px-3 py-1 rounded-md text-slate-400 hover:text-slate-200">稀有 (10)</button>
+          <button onclick="filterCabinet('epic')" class="cab-filter-btn px-3 py-1 rounded-md text-slate-400 hover:text-slate-200">史詩 (8)</button>
+          <button onclick="filterCabinet('legendary')" class="cab-filter-btn px-3 py-1 rounded-md text-slate-400 hover:text-slate-200">傳說 (4)</button>
+        </div>
+        <div class="text-slate-400 font-mono">
+          已解鎖: <span id="cab-progress-num" class="text-amber-400 font-bold">0 / 30 種</span>
+        </div>
+      </div>
+
+      <!-- 30 Items Grid -->
+      <div id="cab-grid-container" class="grid grid-cols-3 sm:grid-cols-5 gap-3 overflow-y-auto pr-1 flex-1 py-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: 排行榜 (Leaderboard)
+       ========================================== -->
+  <div id="modal-leaderboard" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏆</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-100">夜市榮譽排行榜</h3>
+            <p class="text-xs text-slate-400">本機歷史最高紀錄與夜市傳奇選手</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-leaderboard')" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+      </div>
+
+      <div class="flex items-center gap-1.5 my-3 text-xs overflow-x-auto pb-1">
+        <button onclick="renderLeaderboardTab('total')" class="lb-tab px-3 py-1.5 rounded-md bg-amber-400 text-slate-950 font-bold whitespace-nowrap">總積分榜</button>
+        <button onclick="renderLeaderboardTab('balloon')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">🎯 射氣球</button>
+        <button onclick="renderLeaderboardTab('ringToss')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">⭕ 套圈圈</button>
+        <button onclick="renderLeaderboardTab('clawMachine')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">🕹️ 抓娃娃</button>
+        <button onclick="renderLeaderboardTab('baseball')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">⚾ 九宮格</button>
+        <button onclick="renderLeaderboardTab('pinball')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">🔮 打彈珠</button>
+        <button onclick="renderLeaderboardTab('goldfish')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">🐟 撈金魚</button>
+        <button onclick="renderLeaderboardTab('mahjong')" class="lb-tab px-3 py-1.5 rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap">🀄 麻將</button>
+      </div>
+
+      <div id="lb-list-container" class="space-y-2.5 overflow-y-auto flex-1 pr-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: 遊戲說明 (Help)
+       ========================================== -->
+  <div id="modal-help" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📖</span>
+          <h3 class="text-base font-bold text-slate-100">夜市遊玩全攻略</h3>
+        </div>
+        <button onclick="closeModal('modal-help')" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+      </div>
+
+      <div class="space-y-3.5 my-3 text-xs text-slate-300 overflow-y-auto pr-1">
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-1"><span>🗺️</span> 自由探索漫步</h4>
+          <p>使用鍵盤 <strong class="text-amber-300">WASD</strong> 或 <strong class="text-amber-300">方向鍵</strong> 控制角色在熱鬧的夜市大街自由移動，接近攤位時按 <strong class="text-amber-300">[E]</strong> 鍵即可挑戰該攤位！亦可點擊畫面下方直達特快車快速傳送。</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-1"><span>🎯</span> 射氣球 (動態移動靶)</h4>
+          <p>氣球在 4 條不同航速軌道上滑行，包含金色高分星與連環引爆炸彈！預判航速點擊發射飛鏢，擊破氣球賺取高分！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-1"><span>⭕</span> 套圈圈 (階梯酒瓶·風向)</h4>
+          <p>三層階梯式木架放置彈珠汽水、紅酒與金色尊爵瓶！按住滑鼠蓄力調整拋物線距離，注意即時風向阻力，套入瓶頸拿大獎！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-purple-400 mb-1 flex items-center gap-1"><span>🕹️</span> 抓娃娃 (2.5D等角機台)</h4>
+          <p>控制天車雙軸平移，對準目標玩偶按下下爪！越接近玩偶重心抓取力越穩，成功抓出可收穫可愛布偶與分數！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-red-400 mb-1 flex items-center gap-1"><span>⚾</span> 棒球九宮格 (測速·連線)</h4>
+          <p>選擇直球或曲球，瞄準九宮格木板擊倒！達成橫、豎、斜三連線享有 BINGO +500分加成！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-1"><span>🔮</span> 懷舊打彈珠 (多倍率狂彈)</h4>
+          <p>拖曳拉桿蓄力彈簧發射鋼珠，在金屬弧軌與48顆彈性銅釘間激烈彈跳，衝擊 3 組保險桿與最高 15倍 特賞球道！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-cyan-400 mb-1 flex items-center gap-1"><span>🐟</span> 撈金魚 (網破即結算)</h4>
+          <p>移動紙網瞄準游動的金魚！每次入水與撈魚都會消耗紙網耐久，【紙網一旦浸透破裂立即吹哨結算】，考驗你的手速與判斷！</p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-1"><span>🀄</span> 麻將對對碰 (摸牌碰牌)</h4>
+          <p>翻開相同的麻將花色（紅中、青發、白板、筒子、條子）即可碰牌得分，挑戰在有限步數內全數清空！</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT: Complete Standalone Engine
+       ========================================== -->
+  <script>
+    /* =========================================================
+       1. Web Audio API High-Fidelity Synthesizer
+       ========================================================= */
+    class AudioSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) this.ctx = new AudioContextClass();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      }
+      playPop() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+      playBombExplosion() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          // Low boom noise
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.35);
+        } catch (e) {}
+      }
+      playCoin() {
+        this.playTone(987.77, 'sine', 0.08, 0.2);
+        setTimeout(() => this.playTone(1318.51, 'sine', 0.2, 0.2), 60);
+      }
+      playThrow() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.12);
+        } catch (e) {}
+      }
+      playWoodSlam() {
+        this.playTone(120, 'triangle', 0.15, 0.3);
+      }
+      playBottleClink() {
+        this.playTone(1800, 'sine', 0.07, 0.2);
+      }
+      playPinballDing(pitchMultiplier = 1.0) {
+        this.playTone(880 * pitchMultiplier, 'sine', 0.08, 0.18);
+      }
+      playPlunger() {
+        this.playTone(160, 'sawtooth', 0.12, 0.25);
+      }
+      playSplash() {
+        this.playTone(600, 'sine', 0.08, 0.15);
+      }
+      playPaperRip() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(280, this.ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.2);
+        } catch (e) {}
+      }
+      playClawMotor() {
+        this.playTone(140, 'triangle', 0.1, 0.1);
+      }
+      playTileClick() {
+        this.playTone(1200, 'triangle', 0.04, 0.2);
+      }
+      playFanfare() {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.2, 0.2), idx * 110);
+        });
+      }
+    }
+    const sound = new AudioSynthesizer();
+
+    /* =========================================================
+       2. Persistent Local Storage & 30 Prize Definitions
+       ========================================================= */
+    const PRIZES = [
+      // Common (8)
+      { id: 'p_candy', name: '懷舊甘草糖', rarity: 'common', icon: '🍬', desc: '小時候柑仔店與夜市最愛的傳統甘草蜜餞糖。' },
+      { id: 'p_duck', name: '黃色小鴨水槍', rarity: 'common', icon: '🦆', desc: '童年洗澡與夜市必備的小鴨噴水玩具。' },
+      { id: 'p_ring', name: '夜光塑膠發光戒', rarity: 'common', icon: '💍', desc: '在夜市暗處會發出螢光綠色的神奇戒指。' },
+      { id: 'p_balloon_sword', name: '長條氣球寶劍', rarity: 'common', icon: '🎈', desc: '夜市小丑折出來的帥氣英雄長劍。' },
+      { id: 'p_popper', name: '金屬響片青蛙', rarity: 'common', icon: '🐸', desc: '一按就會發出「喀喀」清脆響聲的鐵皮玩具。' },
+      { id: 'p_boba_sticker', name: '珍珠奶茶貼紙', rarity: 'common', icon: '🧋', desc: '台灣夜市標誌性的珍奶Q版防水貼紙。' },
+      { id: 'p_marbles', name: '彩繪玻璃彈珠包', rarity: 'common', icon: '🔮', desc: '裡面有著貓眼花紋的童年珍藏彩色彈珠。' },
+      { id: 'p_poi', name: '撈金魚專用紙網', rarity: 'common', icon: '🕸️', desc: '充滿回憶但也特別容易破掉的童年道具。' },
+
+      // Rare (10)
+      { id: 'p_teddy', name: '精緻小熊布偶', rarity: 'rare', icon: '🧸', desc: '射氣球百步穿楊換回來的柔軟小熊。' },
+      { id: 'p_pin', name: '夜市紀念金屬徽章', rarity: 'rare', icon: '🎖️', desc: '刻有「夜市制霸」字樣的精緻金屬胸針。' },
+      { id: 'p_fan', name: '復古竹編手搖扇', rarity: 'rare', icon: '🪭', desc: '夏夜逛夜市邊走邊搖的清涼懷舊竹扇。' },
+      { id: 'p_chicken', name: '尖叫慘叫雞', rarity: 'rare', icon: '🐔', desc: '一捏就會發出魔性慘叫聲的搞笑舒壓玩具。' },
+      { id: 'p_yo_yo', name: '閃光悠悠球', rarity: 'rare', icon: '🪀', desc: '旋轉時會亮起紅藍雙色LED的炫光悠悠球。' },
+      { id: 'p_opener', name: '台灣啤酒造型開瓶器', rarity: 'rare', icon: '🍺', desc: '夜市熱炒攤最地道的綠色玻璃瓶開瓶器。' },
+      { id: 'p_dice', name: '十八仔大香腸骰子', rarity: 'rare', icon: '🎲', desc: '夜市烤香腸攤跟老闆擲骰子必備的骨質大骰子。' },
+      { id: 'p_water_game', name: '水流套圈套圈掌機', rarity: 'rare', icon: '🎮', desc: '不用插電、按按鈕噴水套圈圈的懷舊掌機。' },
+      { id: 'p_tanghulu', name: '仿真草莓糖葫蘆吊飾', rarity: 'rare', icon: '🍓', desc: '晶瑩剔透糖衣包裹的草莓糖葫蘆仿真鑰匙圈。' },
+      { id: 'p_bubble_gun', name: '全自動八孔泡泡槍', rarity: 'rare', icon: '🫧', desc: '扣下扳機就能噴出漫天彩色泡泡的夢幻玩具。' },
+
+      // Epic (8)
+      { id: 'p_giant_bear', name: '一米高巨大泰迪熊', rarity: 'epic', icon: '🐻', desc: '站在攤位最上方、要擊破所有氣球才能換得的夢幻巨熊。' },
+      { id: 'p_rice_cooker', name: '大同電鍋造型感應卡', rarity: 'epic', icon: '🍚', desc: '台灣國民記憶經典紅色小電鍋，嗶卡時開關還會發光。' },
+      { id: 'p_lantern', name: '祈福紅燈籠手提燈', rarity: 'epic', icon: '🏮', desc: '寫有「吉祥如意」的古典夜市紙燈籠。' },
+      { id: 'p_shiba', name: '胖嘟嘟柴犬趴姿抱枕', rarity: 'epic', icon: '🐕', desc: '娃娃機保夾出貨的極品軟爛柴犬長抱枕。' },
+      { id: 'p_retro_arcade', name: '迷你復古街機存錢筒', rarity: 'epic', icon: '🕹️', desc: '投幣就會播放懷舊 8-bit 音效的迷你街機。' },
+      { id: 'p_gold_dart', name: '鍍金冠軍神鏢組', rarity: 'epic', icon: '🎯', desc: '專業鎢鋼配重、夜市射氣球宗師專用鏢。' },
+      { id: 'p_baseball_glove', name: '王牌簽名皮革棒球手套', rarity: 'epic', icon: '⚾', desc: '九宮格全破榮譽頒發的真皮棒球手套。' },
+      { id: 'p_mahjong_box', name: '黑檀木收藏級麻將禮盒', rarity: 'epic', icon: '🀄', desc: '手感溫潤沉穩、連線自摸全通關之至高獎勵。' },
+
+      // Legendary (4)
+      { id: 'p_golden_dragon', name: '傳奇黃金龍錦鯉', rarity: 'legendary', icon: '🐉', desc: '清涼撈金魚水池中萬中選一的幻之錦鯉，象徵大吉大利！' },
+      { id: 'p_champion_trophy', name: '童趣夜市純金榮譽獎盃', rarity: 'legendary', icon: '🏆', desc: '夜市嘉年華最高榮譽，七大遊戲制霸霸主專屬獎座！' },
+      { id: 'p_night_pass', name: '夜市永久VIP免費招待券', rarity: 'legendary', icon: '🎫', desc: '憑此券可在全台灣夜市享受吃喝玩樂尊榮特權！' },
+      { id: 'p_golden_token', name: '創世紀念黃金夜市代幣', rarity: 'legendary', icon: '🪙', desc: '散發純金耀眼光澤的絕版夜市紀念幣。' }
+    ];
+
+    let userTokens = Number(localStorage.getItem('nm_tokens')) || 10;
+    let totalScore = Number(localStorage.getItem('nm_total_score')) || 0;
+    let highScores = JSON.parse(localStorage.getItem('nm_highscores') || '{}');
+    let inventory = JSON.parse(localStorage.getItem('nm_inventory') || '{}');
+
+    function saveState() {
+      localStorage.setItem('nm_tokens', userTokens);
+      localStorage.setItem('nm_total_score', totalScore);
+      localStorage.setItem('nm_highscores', JSON.stringify(highScores));
+      localStorage.setItem('nm_inventory', JSON.stringify(inventory));
+      const tEl = document.getElementById('header-tokens');
+      if (tEl) tEl.innerText = userTokens;
+    }
+
+    /* =========================================================
+       3. View Switching & Street Map Navigation
+       ========================================================= */
+    let currentView = 'map';
+
+    function switchView(targetView) {
+      sound.playTone(400, 'triangle', 0.05);
+      const views = ['map', 'balloon', 'ringToss', 'clawMachine', 'baseball', 'pinball', 'goldfish', 'mahjong'];
+      views.forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.toggle('hidden', v !== targetView);
+      });
+      const navMap = document.getElementById('nav-btn-map');
+      if (navMap) {
+        navMap.classList.toggle('text-amber-400', targetView === 'map');
+        navMap.classList.toggle('font-bold', targetView === 'map');
+      }
+      currentView = targetView;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMute() {
+      sound.muted = !sound.muted;
+      const sIcon = document.getElementById('sound-icon');
+      if (sIcon) sIcon.innerText = sound.muted ? '🔇' : '🔊';
+    }
+
+    const player = { x: 380, y: 260, avatarIdx: 0 };
+    const avatarList = [
+      { name: '夜市小男孩', icon: '👦' },
+      { name: '活潑小女孩', icon: '👧' },
+      { name: '夜市探險家', icon: '🤠' },
+      { name: '吉祥物廚神', icon: '👨‍🍳' }
+    ];
+
+    const STALLS = [
+      { id: 'balloon', x: 125, y: 120, name: '神射手射氣球' },
+      { id: 'ringToss', x: 300, y: 120, name: '好手氣套圈圈' },
+      { id: 'clawMachine', x: 475, y: 120, name: '歡樂百寶抓娃娃' },
+      { id: 'baseball', x: 650, y: 120, name: '王牌棒球九宮格' },
+      { id: 'pinball', x: 185, y: 425, name: '懷舊木製打彈珠' },
+      { id: 'goldfish', x: 385, y: 425, name: '清涼撈金魚樂園' },
+      { id: 'mahjong', x: 585, y: 425, name: '幸運麻將對對碰' }
+    ];
+
+    let currentNearStall = null;
+    const keyMap = {};
+
+    window.addEventListener('keydown', (e) => {
+      keyMap[e.key.toLowerCase()] = true;
+      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+      if ((e.key.toLowerCase() === 'e' || e.key === 'Enter') && currentNearStall && currentView === 'map') {
+        startGame(currentNearStall.id);
+      }
+      if (e.code === 'Space' && currentView === 'pinball') {
+        launchPinballMarble();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keyMap[e.key.toLowerCase()] = false;
+    });
+
+    function cycleAvatarSkin() {
+      player.avatarIdx = (player.avatarIdx + 1) % avatarList.length;
+      document.getElementById('avatar-sprite').innerText = avatarList[player.avatarIdx].icon;
+      document.getElementById('avatar-tag').innerText = avatarList[player.avatarIdx].name;
+      sound.playTone(520, 'triangle', 0.05);
+    }
+
+    function triggerProximityStall() {
+      if (currentNearStall) startGame(currentNearStall.id);
+    }
+
+    function updateStreetPlayer() {
+      if (currentView === 'map') {
+        const speed = 4.2;
+        let dx = 0; let dy = 0;
+        if (keyMap['w'] || keyMap['arrowup']) dy -= speed;
+        if (keyMap['s'] || keyMap['arrowdown']) dy += speed;
+        if (keyMap['a'] || keyMap['arrowleft']) dx -= speed;
+        if (keyMap['d'] || keyMap['arrowright']) dx += speed;
+
+        if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+
+        if (dx !== 0 || dy !== 0) {
+          player.x = Math.max(70, Math.min(690, player.x + dx));
+          player.y = Math.max(160, Math.min(390, player.y + dy));
+          const pEl = document.getElementById('player-avatar');
+          if (pEl) {
+            pEl.style.left = player.x + 'px';
+            pEl.style.top = player.y + 'px';
+          }
+        }
+
+        // Check proximity to stall
+        currentNearStall = null;
+        for (const st of STALLS) {
+          if (Math.hypot(player.x - st.x, player.y - st.y) < 85) {
+            currentNearStall = st;
+            break;
+          }
+        }
+
+        const bubble = document.getElementById('proximity-bubble');
+        if (bubble) {
+          if (currentNearStall) {
+            bubble.classList.remove('hidden');
+            bubble.style.left = currentNearStall.x + 'px';
+            bubble.style.top = (currentNearStall.y - 45) + 'px';
+            bubble.innerText = `👉 按 [E] 進入【${currentNearStall.name}】`;
+          } else {
+            bubble.classList.add('hidden');
+          }
+        }
+      }
+      requestAnimationFrame(updateStreetPlayer);
+    }
+    requestAnimationFrame(updateStreetPlayer);
+
+    function startGame(id) {
+      sound.playTone(600, 'triangle', 0.08);
+      switchView(id);
+      if (id === 'balloon') initBalloonDarts();
+      if (id === 'ringToss') initRingTossGame();
+      if (id === 'clawMachine') initClawGame();
+      if (id === 'baseball') initBaseballGame();
+      if (id === 'pinball') initPinballGame();
+      if (id === 'goldfish') initGoldfishGame();
+      if (id === 'mahjong') initMahjongGame();
+    }
+
+    /* =========================================================
+       4. Game 1: 射氣球 (Balloon Darts) - 動態移動靶 & 炸彈連鎖
+       ========================================================= */
+    let bdDarts = 8; let bdScore = 0; let bdCombo = 0; let bdHits = 0; let bdShots = 0;
+    let balloons = []; let bdParticles = []; let bdLoopActive = false;
+
+    function initBalloonDarts() {
+      bdDarts = 8; bdScore = 0; bdCombo = 0; bdHits = 0; bdShots = 0;
+      balloons = []; bdParticles = [];
+      document.getElementById('bd-darts-val').innerText = '8 發';
+      document.getElementById('bd-score-val').innerText = '0';
+      document.getElementById('bd-combo-box').classList.add('hidden');
+      document.getElementById('bd-accuracy-val').innerText = '命中率: 0%';
+
+      const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+      // 4 Tracks of moving targets with alternating directions & speeds
+      for (let r = 0; r < 4; r++) {
+        const y = 85 + r * 85;
+        const vx = (r % 2 === 0 ? 1.6 : -2.1) * (1 + r * 0.12);
+        for (let c = 0; c < 7; c++) {
+          const rand = Math.random();
+          const type = rand < 0.18 ? 'gold' : rand < 0.32 ? 'bomb' : 'normal';
+          balloons.push({
+            x: 60 + c * 105, y: y, baseY: y, vx: vx,
+            color: type === 'gold' ? '#fbbf24' : type === 'bomb' ? '#dc2626' : colors[(r * 7 + c) % colors.length],
+            type: type, popped: false,
+            score: type === 'gold' ? 350 : type === 'bomb' ? 200 : 120,
+            radius: 25, phase: Math.random() * 6
+          });
+        }
+      }
+
+      if (!bdLoopActive) {
+        bdLoopActive = true;
+        renderBalloonDartsLoop();
+      }
+    }
+
+    function renderBalloonDartsLoop() {
+      if (currentView !== 'balloon') { bdLoopActive = false; return; }
+      const canvas = document.getElementById('canvas-balloon');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Wooden target board background
+      ctx.fillStyle = '#271406'; ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 12; ctx.strokeRect(14, 14, canvas.width - 28, canvas.height - 28);
+
+      // Conveyor tracks lines
+      [85, 170, 255, 340].forEach(y => {
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(25, y); ctx.lineTo(canvas.width - 25, y); ctx.stroke();
+      });
+
+      // Update & Draw Moving Balloons
+      const time = Date.now() * 0.003;
+      balloons.forEach(b => {
+        if (b.popped) return;
+        b.x += b.vx;
+        if (b.vx > 0 && b.x > canvas.width - 35) b.x = 35;
+        if (b.vx < 0 && b.x < 35) b.x = canvas.width - 35;
+        b.y = b.baseY + Math.sin(time + b.phase) * 5;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(b.x, b.y, b.radius * 0.9, b.radius, 0, 0, Math.PI * 2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+
+        // Balloon highlight & string
+        ctx.beginPath();
+        ctx.ellipse(b.x - 7, b.y - 7, 5, 8, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fill();
+
+        ctx.strokeStyle = '#d4d4d8'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(b.x, b.y + b.radius); ctx.lineTo(b.x, b.y + b.radius + 8); ctx.stroke();
+
+        // Special icon
+        if (b.type === 'gold') {
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('⭐', b.x, b.y);
+        } else if (b.type === 'bomb') {
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('💣', b.x, b.y);
+        }
+        ctx.restore();
+      });
+
+      // Particles
+      for (let i = bdParticles.length - 1; i >= 0; i--) {
+        const p = bdParticles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life -= 0.035;
+        if (p.life <= 0) { bdParticles.splice(i, 1); continue; }
+        ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.globalAlpha = 1.0;
+      }
+
+      requestAnimationFrame(renderBalloonDartsLoop);
+    }
+
+    const bdCanvas = document.getElementById('canvas-balloon');
+    bdCanvas.addEventListener('click', (e) => {
+      if (bdDarts <= 0) return;
+      const rect = bdCanvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (bdCanvas.width / rect.width);
+      const clickY = (e.clientY - rect.top) * (bdCanvas.height / rect.height);
+      shootBalloonDart(clickX, clickY);
+    });
+
+    function shootBalloonDart(x, y) {
+      if (bdDarts <= 0) return;
+      bdDarts--;
+      bdShots++;
+      sound.playThrow();
+      document.getElementById('bd-darts-val').innerText = bdDarts + ' 發';
+
+      let hit = null;
+      for (const b of balloons) {
+        if (!b.popped && Math.hypot(b.x - x, b.y - y) <= b.radius + 6) {
+          hit = b;
+          break;
+        }
+      }
+
+      if (hit) {
+        bdHits++;
+        bdCombo++;
+        popBalloon(hit);
+
+        if (hit.type === 'bomb') {
+          sound.playBombExplosion();
+          // Chain explosion in 110px radius
+          balloons.forEach(b => {
+            if (!b.popped && Math.hypot(b.x - hit.x, b.y - hit.y) < 110) {
+              popBalloon(b, true);
+            }
+          });
+        } else {
+          sound.playPop();
+        }
+
+        const comboEl = document.getElementById('bd-combo-box');
+        if (bdCombo > 1) {
+          comboEl.classList.remove('hidden');
+          document.getElementById('bd-combo-val').innerText = `COMBO x${bdCombo}!`;
+        }
+      } else {
+        bdCombo = 0;
+        document.getElementById('bd-combo-box').classList.add('hidden');
+      }
+
+      const acc = Math.round((bdHits / bdShots) * 100);
+      document.getElementById('bd-accuracy-val').innerText = `命中率: ${acc}%`;
+
+      if (bdDarts <= 0) {
+        setTimeout(endBalloonDarts, 800);
+      }
+    }
+
+    function popBalloon(b, isChain = false) {
+      if (b.popped) return;
+      b.popped = true;
+      const mult = Math.max(1, bdCombo * 0.2 + 0.8);
+      const points = Math.round(b.score * mult);
+      bdScore += points;
+      document.getElementById('bd-score-val').innerText = bdScore;
+
+      // Burst particles
+      for (let i = 0; i < 20; i++) {
+        bdParticles.push({
+          x: b.x, y: b.y,
+          vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+          color: b.color, size: 3 + Math.random() * 4, life: 1.0
+        });
+      }
+    }
+
+    function endBalloonDarts() {
+      settleGame('balloon', bdScore);
+    }
+
+    /* =========================================================
+       5. Game 2: 好手氣套圈圈 (Ring Toss) - 三層酒瓶 & 蓄力拋物線
+       ========================================================= */
+    let rtRings = 8; let rtScore = 0; let rtCharging = false; let rtChargeStart = 0;
+    let rtWind = 0; let rtBottles = []; let rtRingsInAir = []; let rtLoopActive = false;
+
+    function initRingTossGame() {
+      rtRings = 8; rtScore = 0; rtCharging = false;
+      rtWind = (Math.random() - 0.5) * 4;
+      document.getElementById('rt-rings-val').innerText = '8 個';
+      document.getElementById('rt-score-val').innerText = '0';
+      document.getElementById('rt-wind-val').innerText = `${rtWind < 0 ? '←' : '→'} ${Math.abs(rtWind).toFixed(1)} m/s`;
+      document.getElementById('rt-power-val').innerText = '蓄力: 0%';
+
+      rtBottles = [];
+      // Row 1 (Back, Golden, 600 pts)
+      for (let i = 0; i < 4; i++) {
+        rtBottles.push({ x: 230 + i * 100, y: 140, tier: 3, score: 600, color: '#fbbf24', neckRadius: 9, ringed: false });
+      }
+      // Row 2 (Middle, Wine, 300 pts)
+      for (let i = 0; i < 5; i++) {
+        rtBottles.push({ x: 180 + i * 100, y: 230, tier: 2, score: 300, color: '#b91c1c', neckRadius: 11, ringed: false });
+      }
+      // Row 3 (Front, Ramune, 150 pts)
+      for (let i = 0; i < 6; i++) {
+        rtBottles.push({ x: 130 + i * 100, y: 320, tier: 1, score: 150, color: '#0284c7', neckRadius: 14, ringed: false });
+      }
+
+      if (!rtLoopActive) {
+        rtLoopActive = true;
+        renderRingTossLoop();
+      }
+    }
+
+    const rtCanvas = document.getElementById('canvas-ringToss');
+    rtCanvas.addEventListener('mousedown', (e) => {
+      if (rtRings <= 0) return;
+      rtCharging = true;
+      rtChargeStart = Date.now();
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!rtCharging || currentView !== 'ringToss') return;
+      rtCharging = false;
+      const dur = Math.min(1500, Date.now() - rtChargeStart);
+      const power = dur / 1500; // 0.0 ~ 1.0
+
+      const rect = rtCanvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (rtCanvas.width / rect.width);
+      tossRing(clickX, power);
+    });
+
+    function tossRing(aimX, power) {
+      if (rtRings <= 0) return;
+      rtRings--;
+      sound.playThrow();
+      document.getElementById('rt-rings-val').innerText = rtRings + ' 個';
+      document.getElementById('rt-power-val').innerText = '蓄力: 0%';
+
+      // Projected landing Y based on power (power 0 => Y=350; power 1 => Y=120)
+      const targetY = 340 - power * 220;
+      const targetX = aimX + rtWind * 25;
+
+      rtRingsInAir.push({
+        startX: 380, startY: 460,
+        x: 380, y: 460,
+        targetX: targetX, targetY: targetY,
+        progress: 0, speed: 0.035,
+        ringSize: 42
+      });
+    }
+
+    function renderRingTossLoop() {
+      if (currentView !== 'ringToss') { rtLoopActive = false; return; }
+      const canvas = document.getElementById('canvas-ringToss');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Wooden stepped tiers background
+      ctx.fillStyle = '#1c1008'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 3 Tiers
+      [140, 230, 320].forEach((y, idx) => {
+        ctx.fillStyle = idx === 0 ? '#451a03' : idx === 1 ? '#5c2406' : '#78350f';
+        ctx.fillRect(80, y - 25, 600, 70);
+        ctx.strokeStyle = '#9a3412'; ctx.lineWidth = 2; ctx.strokeRect(80, y - 25, 600, 70);
+      });
+
+      // Update Charging Display
+      if (rtCharging) {
+        const dur = Math.min(1500, Date.now() - rtChargeStart);
+        const pct = Math.round((dur / 1500) * 100);
+        document.getElementById('rt-power-val').innerText = `蓄力: ${pct}%`;
+      }
+
+      // Draw Bottles
+      rtBottles.forEach(b => {
+        ctx.save();
+        // Bottle body
+        ctx.fillStyle = b.color;
+        ctx.beginPath();
+        ctx.roundRect(b.x - 14, b.y - 10, 28, 40, 4);
+        ctx.fill();
+
+        // Bottle neck
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x - b.neckRadius, b.y - 32, b.neckRadius * 2, 22);
+
+        // Bottle cap / lip
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(b.x - b.neckRadius - 2, b.y - 35, b.neckRadius * 2 + 4, 5);
+
+        // If ringed
+        if (b.ringed) {
+          ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.ellipse(b.x, b.y - 12, 24, 9, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      // Update Flying Rings
+      for (let i = rtRingsInAir.length - 1; i >= 0; i--) {
+        const ring = rtRingsInAir[i];
+        ring.progress += ring.speed;
+        ring.x = ring.startX + (ring.targetX - ring.startX) * ring.progress;
+        ring.y = ring.startY + (ring.targetY - ring.startY) * ring.progress - Math.sin(ring.progress * Math.PI) * 75;
+        const currentScale = 1.0 - ring.progress * 0.45;
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(ring.x, ring.targetY, 22 * currentScale, 8 * currentScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ring
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 4 * currentScale;
+        ctx.beginPath();
+        ctx.ellipse(ring.x, ring.y, 24 * currentScale, 10 * currentScale, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (ring.progress >= 1.0) {
+          rtRingsInAir.splice(i, 1);
+          // Check collision with bottles
+          let hitBottle = null;
+          for (const b of rtBottles) {
+            if (!b.ringed && Math.hypot(ring.targetX - b.x, ring.targetY - b.y) <= b.neckRadius + 7) {
+              hitBottle = b;
+              break;
+            }
+          }
+
+          if (hitBottle) {
+            hitBottle.ringed = true;
+            sound.playBottleClink();
+            sound.playCoin();
+            rtScore += hitBottle.score;
+            document.getElementById('rt-score-val').innerText = rtScore;
+          } else {
+            sound.playTone(180, 'triangle', 0.08, 0.1);
+          }
+
+          if (rtRings <= 0 && rtRingsInAir.length === 0) {
+            setTimeout(endRingTossGame, 800);
+          }
+        }
+      }
+
+      requestAnimationFrame(renderRingTossLoop);
+    }
+
+    function endRingTossGame() {
+      settleGame('ringToss', rtScore);
+    }
+
+    /* =========================================================
+       6. Game 3: 歡樂百寶抓娃娃 (Claw Machine) - 2.5D等角機台
+       ========================================================= */
+    let cmTries = 5; let cmScore = 0; let cmCaught = 0;
+    let clawPos = { x: 380, y: 120, z: 40 };
+    let clawState = 'idle'; // 'idle' | 'dropping' | 'grabbing' | 'returning'
+    let grabbedPlush = null; let cmLoopActive = false;
+
+    const PLUSHIES = [
+      { id: 'p1', name: '柴犬玩偶', x: 260, y: 360, color: '#f59e0b', icon: '🐕', pts: 400, weight: 1.2 },
+      { id: 'p2', name: '呆萌小鴨', x: 340, y: 380, color: '#facc15', icon: '🦆', pts: 250, weight: 0.9 },
+      { id: 'p3', name: '珍奶抱枕', x: 420, y: 350, color: '#d97706', icon: '🧋', pts: 350, weight: 1.1 },
+      { id: 'p4', name: '粉紅卡比', x: 500, y: 370, color: '#ec4899', icon: '🌸', pts: 300, weight: 1.0 },
+      { id: 'p5', name: '泰迪小熊', x: 290, y: 410, color: '#854d0e', icon: '🧸', pts: 500, weight: 1.3 },
+      { id: 'p6', name: '富士山玩偶', x: 380, y: 420, color: '#38bdf8', icon: '🗻', pts: 320, weight: 1.0 },
+      { id: 'p7', name: '尖叫雞', x: 460, y: 410, color: '#eab308', icon: '🐔', pts: 280, weight: 0.8 },
+      { id: 'p8', name: '招財貓', x: 530, y: 420, color: '#f43f5e', icon: '🐱', pts: 450, weight: 1.2 }
+    ];
+
+    function initClawGame() {
+      cmTries = 5; cmScore = 0; cmCaught = 0;
+      clawPos = { x: 380, y: 120, z: 40 };
+      clawState = 'idle';
+      grabbedPlush = null;
+      document.getElementById('cm-tries-val').innerText = '5 次';
+      document.getElementById('cm-caught-val').innerText = '0 隻';
+      document.getElementById('cm-score-val').innerText = '0';
+      document.getElementById('cm-status-tag').innerText = '🕹️ 操作中';
+
+      if (!cmLoopActive) {
+        cmLoopActive = true;
+        renderClawLoop();
+      }
+    }
+
+    function moveClawManual(dir) {
+      if (clawState !== 'idle') return;
+      const spd = 20;
+      if (dir === 'left') clawPos.x = Math.max(220, clawPos.x - spd);
+      if (dir === 'right') clawPos.x = Math.min(540, clawPos.x + spd);
+      if (dir === 'up') clawPos.y = Math.max(100, clawPos.y - spd);
+      if (dir === 'down') clawPos.y = Math.min(220, clawPos.y + spd);
+      sound.playClawMotor();
+    }
+
+    function dropClawAction() {
+      if (clawState !== 'idle' || cmTries <= 0) return;
+      cmTries--;
+      document.getElementById('cm-tries-val').innerText = cmTries + ' 次';
+      clawState = 'dropping';
+      sound.playClawMotor();
+      document.getElementById('cm-status-tag').innerText = '⏬ 下爪中...';
+    }
+
+    function renderClawLoop() {
+      if (currentView !== 'clawMachine') { cmLoopActive = false; return; }
+      const canvas = document.getElementById('canvas-clawMachine');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Cabinet backdrop
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Glass showcase frame
+      ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 6; ctx.strokeRect(160, 40, 440, 410);
+      ctx.fillStyle = '#1e1b4b'; ctx.fillRect(163, 43, 434, 404);
+
+      // Prize Chute (Bottom Left)
+      ctx.fillStyle = '#09090b'; ctx.fillRect(175, 340, 65, 100);
+      ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 2; ctx.strokeRect(175, 340, 65, 100);
+      ctx.fillStyle = '#ec4899'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('出貨口', 207, 395);
+
+      // Top Gantry Rails
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(170, 70); ctx.lineTo(590, 70); ctx.stroke();
+      ctx.fillStyle = '#334155'; ctx.fillRect(clawPos.x - 20, 60, 40, 20);
+
+      // Plushies in bottom showcase
+      PLUSHIES.forEach(p => {
+        if (p.caught) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(p.icon, p.x, p.y);
+        ctx.restore();
+      });
+
+      // Claw Physics Update
+      if (clawState === 'dropping') {
+        clawPos.z += 4.5;
+        if (clawPos.z >= 240) {
+          clawState = 'grabbing';
+          // Check collision with plushies
+          let best = null; let minDist = 45;
+          PLUSHIES.forEach(p => {
+            if (p.caught) return;
+            const dist = Math.hypot(clawPos.x - p.x, (clawPos.y + clawPos.z) - p.y);
+            if (dist < minDist) { minDist = dist; best = p; }
+          });
+          if (best && Math.random() > 0.25) {
+            grabbedPlush = best;
+            sound.playPop();
+          }
+          setTimeout(() => { clawState = 'returning'; }, 400);
+        }
+      } else if (clawState === 'returning') {
+        clawPos.z = Math.max(40, clawPos.z - 4.5);
+        if (clawPos.z <= 40) {
+          // Move towards chute
+          if (clawPos.x > 205) clawPos.x -= 3.5;
+          else {
+            // Drop into chute!
+            if (grabbedPlush) {
+              grabbedPlush.caught = true;
+              cmCaught++;
+              cmScore += grabbedPlush.pts;
+              sound.playFanfare();
+              sound.playCoin();
+              document.getElementById('cm-caught-val').innerText = `${cmCaught} 隻`;
+              document.getElementById('cm-score-val').innerText = cmScore;
+              grabbedPlush = null;
+            }
+            clawState = 'idle';
+            document.getElementById('cm-status-tag').innerText = '🕹️ 操作中';
+            if (cmTries <= 0) setTimeout(endClawGame, 700);
+          }
+        }
+      }
+
+      // Draw Cable
+      const curClawY = clawPos.y + clawPos.z;
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(clawPos.x, 70); ctx.lineTo(clawPos.x, curClawY); ctx.stroke();
+
+      // Draw Claw Head & Prongs
+      ctx.fillStyle = '#f59e0b'; ctx.fillRect(clawPos.x - 12, curClawY - 8, 24, 16);
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
+      // 3 Prongs
+      [-14, 0, 14].forEach(offset => {
+        ctx.beginPath();
+        ctx.moveTo(clawPos.x + offset * 0.6, curClawY + 8);
+        ctx.lineTo(clawPos.x + offset, curClawY + 28);
+        ctx.stroke();
+      });
+
+      // Draw grabbed plush attached to claw
+      if (grabbedPlush && clawState !== 'idle') {
+        grabbedPlush.x = clawPos.x;
+        grabbedPlush.y = curClawY + 32;
+      }
+
+      requestAnimationFrame(renderClawLoop);
+    }
+
+    function endClawGame() {
+      settleGame('clawMachine', cmScore);
+    }
+
+    /* =========================================================
+       7. Game 4: 王牌棒球九宮格 (Baseball 9-Grid) - 測速與翻牌
+       ========================================================= */
+    let bbBalls = 8; let bbScore = 0; let bbLines = 0; let bbPitchMode = 'fast';
+    let bbPockets = []; let bbAim = { x: 380, y: 240 };
+
+    function initBaseballGame() {
+      bbBalls = 8; bbScore = 0; bbLines = 0; bbPockets = [];
+      document.getElementById('bb-balls-val').innerText = '8 球';
+      document.getElementById('bb-score-val').innerText = '0';
+      document.getElementById('bb-lines-val').innerText = '0 條';
+      document.getElementById('bb-status-msg').innerText = '瞄準木板點擊投球！達成三連線 BINGO +500分！';
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const num = r * 3 + c + 1;
+          bbPockets.push({
+            num: num, r: r, c: c,
+            x: 275 + c * 85, y: 110 + r * 85,
+            knocked: false, score: num === 5 ? 350 : 200
+          });
+        }
+      }
+      renderBaseballCanvas();
+    }
+
+    function setPitchType(type) {
+      bbPitchMode = type;
+      document.getElementById('bb-pitch-fast').className = type === 'fast' ? 'px-3 py-1.5 text-xs font-semibold rounded-md bg-red-500 text-white shadow-sm' : 'px-3 py-1.5 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200';
+      document.getElementById('bb-pitch-curve').className = type === 'curve' ? 'px-3 py-1.5 text-xs font-semibold rounded-md bg-amber-500 text-slate-950 shadow-sm' : 'px-3 py-1.5 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200';
+    }
+
+    function renderBaseballCanvas() {
+      const canvas = document.getElementById('canvas-baseball');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; ctx.strokeRect(260, 95, 270, 270);
+
+      bbPockets.forEach(p => {
+        if (p.knocked) {
+          ctx.fillStyle = '#090d16'; ctx.fillRect(p.x, p.y, 75, 75);
+        } else {
+          ctx.fillStyle = p.num === 5 ? '#ef4444' : '#f59e0b';
+          ctx.roundRect(p.x, p.y, 75, 75, 6); ctx.fill();
+          ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2; ctx.stroke();
+
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(p.num, p.x + 37, p.y + 37);
+        }
+      });
+
+      // Crosshair
+      ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(bbAim.x, bbAim.y, 16, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    const bbCanvas = document.getElementById('canvas-baseball');
+    bbCanvas.addEventListener('mousemove', (e) => {
+      const rect = bbCanvas.getBoundingClientRect();
+      bbAim.x = (e.clientX - rect.left) * (bbCanvas.width / rect.width);
+      bbAim.y = (e.clientY - rect.top) * (bbCanvas.height / rect.height);
+      renderBaseballCanvas();
+    });
+    bbCanvas.addEventListener('click', pitchBaseball);
+
+    function pitchBaseball() {
+      if (bbBalls <= 0) return;
+      sound.playThrow();
+      bbBalls--;
+      document.getElementById('bb-balls-val').innerText = bbBalls + ' 球';
+
+      let tx = bbAim.x; let ty = bbAim.y;
+      if (bbPitchMode === 'curve') {
+        tx += (Math.random() < 0.5 ? 20 : -20);
+        ty += 15;
+      }
+
+      let hit = null;
+      for (const p of bbPockets) {
+        if (!p.knocked && tx >= p.x && tx <= p.x + 75 && ty >= p.y && ty <= p.y + 75) {
+          hit = p; break;
+        }
+      }
+
+      if (hit) {
+        hit.knocked = true;
+        sound.playWoodSlam();
+        bbScore += hit.score;
+
+        const lines = checkBBLines();
+        if (lines > bbLines) {
+          const bonus = (lines - bbLines) * 500;
+          bbScore += bonus;
+          bbLines = lines;
+          sound.playFanfare();
+          document.getElementById('bb-status-msg').innerText = `💥 BINGO! 完成連線 +${bonus}分!`;
+        } else {
+          document.getElementById('bb-status-msg').innerText = `💥 擊倒 ${hit.num} 號牌 (+${hit.score}分)!`;
+        }
+
+        document.getElementById('bb-lines-val').innerText = bbLines + ' 條';
+        document.getElementById('bb-score-val').innerText = bbScore;
+      } else {
+        document.getElementById('bb-status-msg').innerText = '砸中鐵網未擊倒木板！';
+      }
+
+      const spd = Math.round(108 + Math.random() * 22);
+      document.getElementById('bb-speed-tag').innerText = `球速: ${spd} km/h`;
+      renderBaseballCanvas();
+
+      if (bbBalls <= 0) setTimeout(endBaseballGame, 700);
+    }
+
+    function checkBBLines() {
+      const isK = (r, c) => bbPockets.find(p => p.r === r && p.c === c)?.knocked;
+      let lines = 0;
+      for (let i = 0; i < 3; i++) {
+        if (isK(i, 0) && isK(i, 1) && isK(i, 2)) lines++;
+        if (isK(0, i) && isK(1, i) && isK(2, i)) lines++;
+      }
+      if (isK(0, 0) && isK(1, 1) && isK(2, 2)) lines++;
+      if (isK(0, 2) && isK(1, 1) && isK(2, 0)) lines++;
+      return lines;
+    }
+
+    function endBaseballGame() {
+      settleGame('baseball', bbScore);
+    }
+
+    /* =========================================================
+       8. Game 5: 懷舊打彈珠 (Night Market Pinball) - 真實彈性碰撞物理
+       ========================================================= */
+    let pbMarbles = 8; let pbScore = 0; let pbPower = 50; let pbBalls = []; let pbActive = false;
+    let pbPegs = []; let pbBumpers = [];
+
+    function initPinballGame() {
+      pbMarbles = 8; pbScore = 0; pbPower = 50; pbBalls = [];
+      document.getElementById('pb-marbles-val').innerText = '8 顆';
+      document.getElementById('pb-score-val').innerText = '0';
+
+      // Setup 50 Staggered Brass Pegs
+      pbPegs = [];
+      for (let r = 0; r < 8; r++) {
+        const count = r % 2 === 0 ? 9 : 8;
+        const startX = r % 2 === 0 ? 110 : 135;
+        for (let c = 0; c < count; c++) {
+          pbPegs.push({
+            x: startX + c * 52, y: 155 + r * 32,
+            radius: 4.5, glow: 0
+          });
+        }
+      }
+
+      // 3 High-Bouncing Bumpers
+      pbBumpers = [
+        { x: 210, y: 140, radius: 22, color: '#ef4444', glow: 0 },
+        { x: 345, y: 120, radius: 24, color: '#06b6d4', glow: 0 },
+        { x: 480, y: 140, radius: 22, color: '#ef4444', glow: 0 }
+      ];
+
+      if (!pbActive) { pbActive = true; renderPinballLoop(); }
+    }
+
+    function updatePlungerPower(v) {
+      pbPower = Number(v);
+      document.getElementById('pb-power-num').innerText = pbPower + '%';
+    }
+
+    function launchPinballMarble() {
+      if (pbMarbles <= 0) return;
+      sound.playPlunger();
+      pbMarbles--;
+      document.getElementById('pb-marbles-val').innerText = pbMarbles + ' 顆';
+
+      // Launch marble from right alley with upward force
+      const launchSpeed = -15 - (pbPower / 100) * 16;
+      pbBalls.push({
+        x: 620, y: 440,
+        vx: 0, vy: launchSpeed,
+        radius: 7, active: true, combo: 0
+      });
+    }
+
+    function renderPinballLoop() {
+      if (currentView !== 'pinball') { pbActive = false; return; }
+      const canvas = document.getElementById('canvas-pinball');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Wooden Table Frame
+      ctx.fillStyle = '#3f1a04'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 14; ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+
+      // Top Curved Metal Deflector Guide
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.moveTo(600, 450); ctx.lineTo(600, 110);
+      ctx.bezierCurveTo(600, 25, 380, 24, 250, 35);
+      ctx.bezierCurveTo(140, 45, 75, 75, 70, 140);
+      ctx.stroke();
+
+      // Multiplier Slots (Bottom)
+      const mults = [10, 3, 5, 1, 8, 2, 15];
+      const slotW = 490 / 7;
+      mults.forEach((m, i) => {
+        const sx = 85 + i * slotW;
+        ctx.fillStyle = m >= 10 ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.18)';
+        ctx.fillRect(sx, 415, slotW, 45);
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(sx, 405, 3.5, 55);
+        ctx.fillStyle = m >= 10 ? '#fbbf24' : '#e2e8f0';
+        ctx.font = 'bold 12px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(m + '倍', sx + slotW / 2, 442);
+      });
+      ctx.fillStyle = '#f8fafc'; ctx.fillRect(85 + 7 * slotW, 405, 3.5, 55);
+
+      // Draw Bumpers
+      pbBumpers.forEach(b => {
+        ctx.save();
+        ctx.fillStyle = b.color;
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = b.glow > 0 ? '#fef08a' : '#ffffff'; ctx.lineWidth = 3; ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('+150', b.x, b.y);
+        ctx.restore();
+        if (b.glow > 0) b.glow -= 0.05;
+      });
+
+      // Draw Brass Pegs
+      pbPegs.forEach(peg => {
+        ctx.save();
+        ctx.fillStyle = peg.glow > 0 ? '#fef08a' : '#fbbf24';
+        ctx.beginPath(); ctx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.restore();
+        if (peg.glow > 0) peg.glow -= 0.05;
+      });
+
+      // Marbles Physics & Dynamic Elastic Bouncing
+      pbBalls.forEach(ball => {
+        if (!ball.active) return;
+        ball.vy += 0.28; // Gravity
+        ball.x += ball.vx; ball.y += ball.vy;
+
+        // Top arc deflection
+        if (ball.y < 85 && ball.x > 320) {
+          ball.y = 85; ball.vy = Math.abs(ball.vy) * 0.45; ball.vx = -7 - Math.random() * 4;
+          sound.playPinballDing(1.4);
+        }
+
+        // Walls
+        if (ball.x < 78) { ball.x = 78; ball.vx = Math.abs(ball.vx) * 0.82 + 1.5; sound.playPinballDing(1.1); }
+        if (ball.x > 590 && ball.y > 90) { ball.x = 590; ball.vx = -(Math.abs(ball.vx) * 0.82 + 1.5); sound.playPinballDing(1.1); }
+
+        // Bumper collisions (High elastic restitution)
+        pbBumpers.forEach(b => {
+          const dist = Math.hypot(ball.x - b.x, ball.y - b.y);
+          if (dist < ball.radius + b.radius) {
+            const nx = (ball.x - b.x) / dist;
+            const ny = (ball.y - b.y) / dist;
+            ball.vx = nx * 9 + (Math.random() - 0.5) * 3;
+            ball.vy = ny * 9;
+            b.glow = 1.0;
+            pbScore += 150;
+            document.getElementById('pb-score-val').innerText = pbScore;
+            sound.playPinballDing(1.8);
+          }
+        });
+
+        // Brass Pegs collisions (Elastic Reflection + Jitter)
+        pbPegs.forEach(p => {
+          const dist = Math.hypot(ball.x - p.x, ball.y - p.y);
+          if (dist < ball.radius + p.radius) {
+            const nx = (ball.x - p.x) / dist;
+            const ny = (ball.y - p.y) / dist;
+            // Normal dot product
+            const dot = ball.vx * nx + ball.vy * ny;
+            ball.vx = (ball.vx - 1.8 * dot * nx) * 0.78 + (Math.random() - 0.5) * 2.5;
+            ball.vy = (ball.vy - 1.8 * dot * ny) * 0.78;
+            p.glow = 1.0;
+            ball.combo++;
+            sound.playPinballDing(1.0 + Math.min(0.8, ball.combo * 0.08));
+          }
+        });
+
+        // Slot Entry (Bottom)
+        if (ball.y >= 422) {
+          ball.active = false;
+          const idx = Math.floor((ball.x - 85) / slotW);
+          const mult = mults[Math.max(0, Math.min(6, idx))] || 1;
+          const pts = 100 * mult;
+          pbScore += pts;
+          document.getElementById('pb-score-val').innerText = pbScore;
+          if (pts > 0) sound.playCoin();
+
+          if (pbMarbles <= 0 && pbBalls.filter(b => b.active).length === 0) {
+            setTimeout(endPinballGame, 700);
+          }
+        }
+
+        // Render Steel Marble with realistic specular shine
+        ctx.save();
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(ball.x - 2, ball.y - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(renderPinballLoop);
+    }
+
+    function endPinballGame() {
+      settleGame('pinball', pbScore);
+    }
+
+    /* =========================================================
+       9. Game 6: 撈金魚 (Goldfish Scoop) - 網破立即吹哨結算
+       ========================================================= */
+    let gfDurability = 100; let gfScore = 0; let gfTorn = false; let gfSchool = [];
+    let gfPoi = { x: 380, y: 240 }; let gfActive = false;
+
+    function initGoldfishGame() {
+      gfDurability = 100; gfScore = 0; gfTorn = false;
+      document.getElementById('gf-score-val').innerText = '0';
+      document.getElementById('gf-status-tag').innerText = '🕸️ 紙網完整';
+      document.getElementById('gf-durability-num').innerText = '100%';
+      document.getElementById('gf-durability-bar').style.width = '100%';
+
+      gfSchool = [];
+      // 1 Legendary Golden Koi, 4 Red Ryukin, 3 Black Moor, 2 Calico
+      gfSchool.push({ x: 200, y: 180, vx: 2.2, vy: 1.5, type: 'golden', pts: 700, color: '#fbbf24', radius: 20, caught: false });
+      for (let i = 0; i < 4; i++) {
+        gfSchool.push({ x: 120 + i * 110, y: 150 + i * 40, vx: (Math.random() - 0.5) * 2.8, vy: (Math.random() - 0.5) * 2.8, type: 'red', pts: 150, color: '#ef4444', radius: 14, caught: false });
+      }
+      for (let i = 0; i < 3; i++) {
+        gfSchool.push({ x: 180 + i * 140, y: 280, vx: (Math.random() - 0.5) * 2.2, vy: (Math.random() - 0.5) * 2.2, type: 'black', pts: 250, color: '#1e293b', radius: 16, caught: false });
+      }
+      for (let i = 0; i < 2; i++) {
+        gfSchool.push({ x: 220 + i * 160, y: 340, vx: (Math.random() - 0.5) * 3.4, vy: (Math.random() - 0.5) * 3.4, type: 'calico', pts: 400, color: '#f97316', radius: 15, caught: false });
+      }
+
+      if (!gfActive) { gfActive = true; renderGoldfishLoop(); }
+    }
+
+    const gfCanvas = document.getElementById('canvas-goldfish');
+    gfCanvas.addEventListener('mousemove', (e) => {
+      const rect = gfCanvas.getBoundingClientRect();
+      gfPoi.x = (e.clientX - rect.left) * (gfCanvas.width / rect.width);
+      gfPoi.y = (e.clientY - rect.top) * (gfCanvas.height / rect.height);
+    });
+    gfCanvas.addEventListener('click', scoopGoldfish);
+
+    function scoopGoldfish() {
+      if (gfTorn) return;
+      sound.playSplash();
+
+      let target = null;
+      for (const f of gfSchool) {
+        if (!f.caught && Math.hypot(f.x - gfPoi.x, f.y - gfPoi.y) < 38) {
+          target = f; break;
+        }
+      }
+
+      if (target) {
+        // Struggling damage
+        const damage = target.type === 'golden' ? 45 : target.type === 'calico' ? 32 : target.type === 'black' ? 24 : 18;
+        gfDurability -= damage;
+
+        if (gfDurability <= 0) {
+          breakPoi();
+        } else {
+          target.caught = true;
+          gfScore += target.pts;
+          sound.playCoin();
+          document.getElementById('gf-score-val').innerText = gfScore;
+          updateGfBar();
+        }
+      } else {
+        // Water resistance soak damage
+        gfDurability -= 8;
+        if (gfDurability <= 0) breakPoi();
+        else updateGfBar();
+      }
+    }
+
+    function breakPoi() {
+      gfTorn = true;
+      sound.playPaperRip();
+      document.getElementById('gf-status-tag').innerText = '💥 紙網破裂！吹哨結算！';
+      document.getElementById('gf-durability-num').innerText = '0%';
+      document.getElementById('gf-durability-bar').style.width = '0%';
+      setTimeout(endGoldfishGame, 900);
+    }
+
+    function updateGfBar() {
+      document.getElementById('gf-durability-num').innerText = Math.max(0, Math.round(gfDurability)) + '%';
+      document.getElementById('gf-durability-bar').style.width = Math.max(0, gfDurability) + '%';
+    }
+
+    function renderGoldfishLoop() {
+      if (currentView !== 'goldfish') { gfActive = false; return; }
+      const canvas = document.getElementById('canvas-goldfish');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Turquoise Clear Water Tub
+      ctx.fillStyle = '#0284c7'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Tub Edge
+      ctx.strokeStyle = '#0369a1'; ctx.lineWidth = 14; ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+
+      // Floating Duckweeds
+      [{ x: 140, y: 90 }, { x: 620, y: 120 }, { x: 580, y: 390 }, { x: 160, y: 370 }].forEach(w => {
+        ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(w.x, w.y, 20, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#166534'; ctx.beginPath(); ctx.arc(w.x - 3, w.y - 3, 14, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Update & Draw Fish with Waving Tail
+      gfSchool.forEach(f => {
+        if (f.caught) return;
+        f.x += f.vx; f.y += f.vy;
+        if (f.x < 50 || f.x > canvas.width - 50) f.vx *= -1;
+        if (f.y < 50 || f.y > canvas.height - 50) f.vy *= -1;
+
+        const angle = Math.atan2(f.vy, f.vx);
+        ctx.save();
+        ctx.translate(f.x, f.y);
+        ctx.rotate(angle);
+
+        // Fish Body
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, f.radius * 1.3, f.radius * 0.75, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Fish Tail with Wave
+        const tailWave = Math.sin(Date.now() * 0.01 + f.x) * 4;
+        ctx.beginPath();
+        ctx.moveTo(-f.radius * 1.2, 0);
+        ctx.lineTo(-f.radius * 2.0, -8 + tailWave);
+        ctx.lineTo(-f.radius * 2.0, 8 + tailWave);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(f.radius * 0.8, -4, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(f.radius * 0.9, -4, 1.5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+      });
+
+      // The Paper Poi (Follows Mouse)
+      ctx.save();
+      ctx.translate(gfPoi.x, gfPoi.y);
+
+      // Outer Plastic Ring & Handle
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(0, 0, 36, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#f59e0b'; ctx.fillRect(-4, 34, 8, 30); // Handle
+
+      // Paper Surface
+      if (gfTorn) {
+        // Broken torn hole!
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.beginPath(); ctx.arc(0, 0, 33, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0284c7'; // Water showing through hole
+        ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        const paperAlpha = (gfDurability / 100) * 0.55 + 0.1;
+        ctx.fillStyle = `rgba(255,255,255,${paperAlpha})`;
+        ctx.beginPath(); ctx.arc(0, 0, 33, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+
+      requestAnimationFrame(renderGoldfishLoop);
+    }
+
+    function endGoldfishGame() {
+      settleGame('goldfish', gfScore);
+    }
+
+    /* =========================================================
+       10. Game 7: 幸運麻將對對碰 (Mahjong Match)
+       ========================================================= */
+    const MJ_DEFS = [
+      { key: 'zhong', name: '紅中', sym: '🀄', pts: 250 },
+      { key: 'fa', name: '青發', sym: '🀅', pts: 250 },
+      { key: 'bai', name: '白板', sym: '🀆', pts: 250 },
+      { key: 'tong1', name: '一筒', sym: '🀙', pts: 180 },
+      { key: 'tong8', name: '八筒', sym: '🀠', pts: 150 },
+      { key: 'tiao1', name: '么雞', sym: '🀐', pts: 200 },
+      { key: 'tiao9', name: '九條', sym: '🀘', pts: 150 },
+      { key: 'wan', name: '萬子', sym: '🀇', pts: 180 }
+    ];
+
+    let mjTiles = []; let mjFlips = []; let mjScore = 0; let mjTurns = 18; let mjMatches = 0;
+
+    function initMahjongGame() {
+      mjScore = 0; mjTurns = 18; mjMatches = 0; mjFlips = [];
+      document.getElementById('mj-score-val').innerText = '0';
+      document.getElementById('mj-turns-val').innerText = '18 回';
+      document.getElementById('mj-matches-count').innerText = '已湊成: 0 / 8 對';
+
+      let pool = [];
+      MJ_DEFS.forEach(d => {
+        pool.push({ ...d, flipped: false, matched: false });
+        pool.push({ ...d, flipped: false, matched: false });
+      });
+      pool.sort(() => Math.random() - 0.5);
+      mjTiles = pool;
+
+      renderMahjongTiles();
+    }
+
+    function renderMahjongTiles() {
+      const container = document.getElementById('mj-tiles-grid');
+      if (!container) return;
+      container.innerHTML = '';
+      mjTiles.forEach((t, i) => {
+        const d = document.createElement('div');
+        d.className = `aspect-[3/4] rounded-xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 shadow-md ${
+          t.matched ? 'border-emerald-400 bg-emerald-950/80 opacity-80' :
+          t.flipped ? 'border-amber-400 bg-gradient-to-b from-amber-50 to-amber-100 text-slate-900' :
+          'border-emerald-700 bg-gradient-to-b from-emerald-700 to-emerald-900 hover:border-amber-400'
+        }`;
+        d.innerHTML = (t.flipped || t.matched)
+          ? `<span class="text-4xl filter drop-shadow">${t.sym}</span><span class="text-xs font-bold mt-1">${t.name}</span>`
+          : `<span class="text-2xl text-emerald-300">🀄</span>`;
+        d.onclick = () => flipMJTile(i);
+        container.appendChild(d);
+      });
+    }
+
+    function flipMJTile(idx) {
+      if (mjFlips.length >= 2 || mjTiles[idx].flipped || mjTiles[idx].matched) return;
+      sound.playTileClick();
+      mjTiles[idx].flipped = true;
+      mjFlips.push(idx);
+      renderMahjongTiles();
+
+      if (mjFlips.length === 2) {
+        mjTurns--;
+        document.getElementById('mj-turns-val').innerText = mjTurns + ' 回';
+        const [i1, i2] = mjFlips;
+
+        if (mjTiles[i1].key === mjTiles[i2].key) {
+          setTimeout(() => {
+            sound.playCoin();
+            mjTiles[i1].matched = true;
+            mjTiles[i2].matched = true;
+            mjScore += mjTiles[i1].pts;
+            mjMatches++;
+            document.getElementById('mj-score-val').innerText = mjScore;
+            document.getElementById('mj-matches-count').innerText = `已湊成: ${mjMatches} / 8 對`;
+            document.getElementById('mj-status-text').innerText = `🎉 碰！湊成【${mjTiles[i1].name}】(+${mjTiles[i1].pts}分)!`;
+            mjFlips = [];
+            renderMahjongTiles();
+
+            if (mjMatches >= 8) setTimeout(() => endMahjongGame(), 600);
+          }, 350);
+        } else {
+          setTimeout(() => {
+            mjTiles[i1].flipped = false;
+            mjTiles[i2].flipped = false;
+            mjFlips = [];
+            renderMahjongTiles();
+            if (mjTurns <= 0) endMahjongGame();
+          }, 700);
+        }
+      }
+    }
+
+    function endMahjongGame() {
+      settleGame('mahjong', mjScore);
+    }
+
+    /* =========================================================
+       11. Settlement & Lucky Box Draw
+       ========================================================= */
+    let lastGameId = 'balloon';
+
+    function settleGame(gameId, score) {
+      sound.playFanfare();
+      lastGameId = gameId;
+      totalScore += score;
+      highScores[gameId] = Math.max(highScores[gameId] || 0, score);
+
+      let rank = 'C';
+      if (score >= 1800) rank = 'S';
+      else if (score >= 1200) rank = 'A';
+      else if (score >= 600) rank = 'B';
+
+      const earnedTokens = rank === 'S' ? 5 : rank === 'A' ? 3 : rank === 'B' ? 2 : 1;
+      userTokens += earnedTokens;
+      saveState();
+
+      document.getElementById('settle-score-text').innerText = score.toLocaleString();
+      const badge = document.getElementById('settle-rank-badge');
+      badge.innerText = rank;
+      badge.className = `w-14 h-14 rounded-xl font-black text-3xl flex items-center justify-center shadow-lg border-2 ${
+        rank === 'S' ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-amber-950 border-amber-300' :
+        rank === 'A' ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-purple-400' :
+        rank === 'B' ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-blue-400' :
+        'bg-slate-700 text-slate-200 border-slate-600'
+      }`;
+      document.getElementById('settle-tokens-text').innerText = `+${earnedTokens}`;
+
+      document.getElementById('loot-closed-box').classList.remove('hidden');
+      document.getElementById('loot-revealed-box').classList.add('hidden');
+      document.getElementById('modal-settle').classList.remove('hidden');
+    }
+
+    function drawLuckyBox() {
+      sound.playCoin();
+      document.getElementById('loot-closed-box').classList.add('hidden');
+      document.getElementById('loot-revealed-box').classList.remove('hidden');
+
+      const prize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
+      inventory[prize.id] = (inventory[prize.id] || 0) + 1;
+      saveState();
+
+      document.getElementById('loot-prize-icon').innerText = prize.icon;
+      document.getElementById('loot-prize-name').innerText = prize.name;
+      document.getElementById('loot-prize-desc').innerText = prize.desc;
+      const rTag = document.getElementById('loot-prize-rarity');
+      rTag.innerText = prize.rarity === 'legendary' ? '傳說' : prize.rarity === 'epic' ? '史詩' : prize.rarity === 'rare' ? '稀有' : '普通';
+      rTag.className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${
+        prize.rarity === 'legendary' ? 'bg-amber-900/60 text-amber-200 border border-amber-500/40' :
+        prize.rarity === 'epic' ? 'bg-purple-900/60 text-purple-200 border border-purple-500/40' :
+        prize.rarity === 'rare' ? 'bg-sky-900/60 text-sky-200 border border-sky-500/40' : 'bg-slate-800 text-slate-300'
+      }`;
+    }
+
+    function repeatCurrentGame() {
+      document.getElementById('modal-settle').classList.add('hidden');
+      startGame(lastGameId);
+    }
+
+    function closeSettleAndReturn() {
+      document.getElementById('modal-settle').classList.add('hidden');
+      switchView('map');
+    }
+
+    /* =========================================================
+       12. Modals (Cabinet, Leaderboard, Help)
+       ========================================================= */
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openCabinetModal() {
+      sound.playTone(450, 'triangle', 0.05);
+      renderCabinetItems('all');
+      document.getElementById('modal-cabinet').classList.remove('hidden');
+    }
+
+    function filterCabinet(r) {
+      document.querySelectorAll('.cab-filter-btn').forEach(btn => {
+        btn.className = 'cab-filter-btn px-3 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-slate-200';
+      });
+      event.target.className = 'cab-filter-btn px-3 py-1 text-xs font-bold rounded-md bg-amber-400 text-slate-950';
+      renderCabinetItems(r);
+    }
+
+    function renderCabinetItems(filter = 'all') {
+      const container = document.getElementById('cab-grid-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const unlockedCount = PRIZES.filter(p => (inventory[p.id] || 0) > 0).length;
+      document.getElementById('cab-progress-num').innerText = `${unlockedCount} / 30 種`;
+
+      const list = filter === 'all' ? PRIZES : PRIZES.filter(p => p.rarity === filter);
+      list.forEach(p => {
+        const count = inventory[p.id] || 0;
+        const d = document.createElement('div');
+        d.className = `p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all hover:scale-105 ${
+          count > 0 ? (
+            p.rarity === 'legendary' ? 'border-amber-500/80 bg-amber-950/40' :
+            p.rarity === 'epic' ? 'border-purple-500/60 bg-purple-950/40' :
+            p.rarity === 'rare' ? 'border-sky-500/50 bg-sky-950/40' :
+            'border-slate-700 bg-slate-900/80'
+          ) : 'border-slate-800 bg-slate-950/50 opacity-60'
+        }`;
+        d.innerHTML = `
+          <div class="text-3xl my-1">${count > 0 ? p.icon : '🔒'}</div>
+          <div class="text-xs font-bold ${count > 0 ? 'text-slate-100' : 'text-slate-500'} truncate w-full">${count > 0 ? p.name : '？？？？'}</div>
+          <div class="text-[10px] text-slate-400 mt-1">${count > 0 ? `持有 ${count} 件` : '未解鎖'}</div>
+        `;
+        container.appendChild(d);
+      });
+    }
+
+    function openLeaderboardModal() {
+      sound.playTone(450, 'triangle', 0.05);
+      renderLeaderboardTab('total');
+      document.getElementById('modal-leaderboard').classList.remove('hidden');
+    }
+
+    function renderLeaderboardTab(tab = 'total') {
+      document.querySelectorAll('.lb-tab').forEach(b => {
+        b.className = 'lb-tab px-3 py-1.5 text-xs font-semibold rounded-md text-slate-400 bg-slate-900 border border-slate-800 whitespace-nowrap';
+      });
+      if (event && event.target && event.target.classList.contains('lb-tab')) {
+        event.target.className = 'lb-tab px-3 py-1.5 text-xs font-semibold rounded-md bg-amber-400 text-slate-950 whitespace-nowrap';
+      }
+
+      const container = document.getElementById('lb-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const myScore = tab === 'total' ? totalScore : (highScores[tab] || 0);
+
+      const rows = [
+        { rank: 1, name: '士林夜市老鏢神', score: 14800, title: '夜市宗師' },
+        { rank: 2, name: '逢甲快爪阿明', score: 12550, title: '娃娃達人' },
+        { rank: 3, name: '饒河彈珠老手', score: 10200, title: '鋼珠霸王' },
+        { rank: 4, name: '你 (當前玩家)', score: myScore, title: '夜市達人', isMe: true }
+      ].sort((a,b) => b.score - a.score);
+
+      rows.forEach((r, idx) => {
+        const d = document.createElement('div');
+        d.className = `p-3 rounded-xl border flex items-center justify-between ${
+          r.isMe ? 'bg-amber-950/30 border-amber-500/80' : 'bg-slate-950/40 border-slate-800/80'
+        }`;
+        d.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center ${
+              idx === 0 ? 'bg-amber-400 text-slate-950' : idx === 1 ? 'bg-slate-300 text-slate-950' : 'bg-slate-800 text-slate-400'
+            }">#${idx + 1}</div>
+            <div>
+              <div class="text-sm font-bold ${r.isMe ? 'text-amber-300' : 'text-slate-100'}">${r.name}</div>
+              <div class="text-xs text-slate-400">${r.title}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-base font-bold font-mono text-amber-400">${r.score.toLocaleString()}</span>
+            <span class="text-[10px] text-slate-500 block">分</span>
+          </div>
+        `;
+        container.appendChild(d);
+      });
+    }
+
+    function openHelpModal() {
+      sound.playTone(450, 'triangle', 0.05);
+      document.getElementById('modal-help').classList.remove('hidden');
+    }
+
+    // Startup initialization
+    saveState();
+  </script>
+</body>
+</html>
